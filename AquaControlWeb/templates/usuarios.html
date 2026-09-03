@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aqua Control | Usuarios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-page">
+    <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button><div class="sidebar-overlay"></div>
+    <aside class="sidebar">
+        <div class="sidebar-brand"><img class="sidebar-logo" src="{{ url_for('static', filename='img/logo-aqua-control.png') }}" alt="Aqua Control"></div>
+        <nav class="sidebar-nav" aria-label="Navegación principal">
+            <a class="nav-item" href="{{ url_for('dashboard') }}"><span>⌂</span>Panel principal</a><a class="nav-item" href="{{ url_for('trabajadores') }}"><span>♙</span>Trabajadores</a><a class="nav-item" href="{{ url_for('asistencia') }}"><span>✓</span>Asistencia</a><a class="nav-item" href="{{ url_for('calendario') }}"><span>□</span>Calendario</a><a class="nav-item" href="{{ url_for('historial') }}"><span>↺</span>Historial</a><a class="nav-item" href="{{ url_for('reportes') }}"><span>▥</span>Reportes</a><a class="nav-item" href="{{ url_for('ciclos') }}"><span>◌</span>Ciclos</a><a class="nav-item active" href="{{ url_for('usuarios') }}"><span>♙</span>Usuarios</a>
+        </nav><a class="nav-item logout" href="{{ url_for('logout') }}"><span>↪</span>Cerrar sesión</a>
+    </aside>
+    <main class="dashboard-content">
+        <header class="page-header"><div><p class="eyebrow">Control de acceso</p><h1>Usuarios</h1><p class="welcome">Administra cuentas, roles y estados de acceso.</p></div></header>
+        {% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="alert {{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
+        <section class="page-card">
+            <form method="post" class="user-form">
+                <input type="hidden" name="user_id" value="{{ user.id if user else '' }}">
+                <label>Nombre<input name="nombre" value="{{ user.nombre if user else '' }}" required></label>
+                <label>Usuario<input name="usuario" value="{{ user.usuario if user else '' }}" required></label>
+                <label>Rol<select name="rol" required>{% for role in ['Administrador','Supervisor','Consulta'] %}<option value="{{ role }}" {% if user and user.rol == role %}selected{% endif %}>{{ role }}</option>{% endfor %}</select></label>
+                <label>Contraseña {% if user %}<small>(opcional al editar)</small>{% endif %}<input name="password" type="password" minlength="8" {% if not user %}required{% endif %} placeholder="{% if user %}Dejar vacía para conservar{% else %}Mínimo 8 caracteres{% endif %}"></label>
+                <div class="form-actions"><button class="secondary-button" type="submit">{{ 'Guardar cambios' if user else 'Crear usuario' }}</button>{% if user %}<a class="cancel-button" href="{{ url_for('usuarios') }}">Cancelar</a>{% endif %}</div>
+            </form>
+        </section>
+        <section class="page-card user-table-card"><div class="section-heading"><div><p class="eyebrow">Cuentas registradas</p><h2>Usuarios del sistema</h2></div></div><div class="table-wrapper"><table class="workers-table"><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Fecha de creación</th><th>Acciones</th></tr></thead><tbody>{% for item in users %}<tr><td><strong>{{ item.nombre }}</strong></td><td>{{ item.usuario }}</td><td>{{ item.rol }}</td><td><span class="table-status {{ 'working' if item.estado == 'Activo' else 'resting' }}">{{ item.estado }}</span></td><td>{{ item.fecha_creacion[:10] }}</td><td><div class="table-actions"><a class="action-button edit-button" href="{{ url_for('usuarios', editar=item.id) }}">Editar</a>{% if item.id != session.get('user_id') %}<form method="post" action="{{ url_for('cambiar_estado_usuario', user_id=item.id) }}"><button class="action-button delete-button" type="submit">{{ 'Desactivar' if item.estado == 'Activo' else 'Activar' }}</button></form>{% endif %}<form method="post" action="{{ url_for('restablecer_password_usuario', user_id=item.id) }}"><input class="reset-password-input" name="password" type="password" minlength="8" placeholder="Nueva contraseña" required><button class="action-button edit-button" type="submit">Restablecer</button></form></div></td></tr>{% endfor %}</tbody></table></div></section>
+    </main><script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

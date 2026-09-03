@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aqua Control | Asistencia</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-page">
+    <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    <div class="sidebar-overlay"></div>
+    <aside class="sidebar">
+        <div class="sidebar-brand"><img class="sidebar-logo" src="{{ url_for('static', filename='img/logo-aqua-control.png') }}" alt="Aqua Control"></div>
+        <nav class="sidebar-nav" aria-label="Navegación principal">
+            <a class="nav-item" href="{{ url_for('dashboard') }}"><span>⌂</span>Panel principal</a>
+            <a class="nav-item" href="{{ url_for('trabajadores') }}"><span>♙</span>Trabajadores</a>
+            <a class="nav-item active" href="{{ url_for('asistencia') }}"><span>✓</span>Asistencia</a>
+            <a class="nav-item" href="{{ url_for('calendario') }}"><span>□</span>Calendario</a><a class="nav-item" href="{{ url_for('historial') }}"><span>↺</span>Historial</a>
+            <a class="nav-item" href="{{ url_for('reportes') }}"><span>▥</span>Reportes</a><a class="nav-item" href="{{ url_for('ciclos') }}"><span>◌</span>Ciclos</a>
+            {% if session.get('rol') == 'Administrador' %}<a class="nav-item" href="{{ url_for('usuarios') }}"><span>♙</span>Usuarios</a>{% endif %}
+        </nav>
+        <a class="nav-item logout" href="{{ url_for('logout') }}"><span>↪</span>Cerrar sesión</a>
+    </aside>
+    <main class="dashboard-content">
+        <header class="page-header">
+            <div><p class="eyebrow">Control diario</p><h1>Asistencia</h1><p class="welcome">Registra entradas y salidas usando la cédula del trabajador.</p></div>
+            <span class="date-badge">{{ today }}</span>
+        </header>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}<div class="alert {{ category }}">{{ message }}</div>{% endfor %}
+        {% endwith %}
+        <section class="page-card attendance-card">
+            <form method="get" class="attendance-search">
+                <label for="cedula">Cédula del trabajador</label>
+                <div class="search-row"><input id="cedula" name="cedula" value="{{ cedula }}" placeholder="Escribe la cédula" autofocus required><button class="secondary-button" type="submit">Buscar trabajador</button></div>
+            </form>
+            {% if cedula and not worker %}<div class="alert error">El trabajador no está registrado.</div>{% endif %}
+            {% if worker %}
+            <div class="worker-summary">
+                <div><p class="eyebrow">Trabajador encontrado</p><h2>{{ worker.nombres }} {{ worker.apellidos }}</h2><p>{{ worker.cargo }} · Grupo {{ worker.grupo }} · {{ worker.estado }}</p></div>
+                <div class="worker-id">{{ worker.cedula }}</div>
+            </div>
+            {% if worker_cycle and worker_cycle.is_resting %}<div class="scheduled-rest">DESCANSO PROGRAMADO · Grupo {{ worker.grupo }} se encuentra en descanso.</div>{% endif %}
+            {% if today_attendance %}
+                <div class="today-record"><strong>Asistencia de hoy</strong><span>{{ today_attendance.estado }}</span><small>Entrada: {{ today_attendance.hora_entrada or '—' }} | Salida: {{ today_attendance.hora_salida or 'Pendiente' }}</small></div>
+            {% endif %}
+            <form method="post" class="attendance-actions">
+                <input type="hidden" name="cedula" value="{{ worker.cedula }}">
+                {% if worker_cycle and worker_cycle.is_resting %}{% else %}
+                {% if not today_attendance %}<input class="observation-input" name="observacion" placeholder="Observación opcional">{% endif %}
+                {% if not today_attendance %}
+                    <button class="action-main" name="action" value="entrada" type="submit">Registrar entrada</button>
+                    <button class="action-alt" name="action" value="permiso" type="submit">Marcar permiso</button>
+                    <button class="action-alt" name="action" value="vacaciones" type="submit">Marcar vacaciones</button>
+                {% elif today_attendance.estado == 'Presente' and not today_attendance.hora_salida %}
+                    <button class="action-main" name="action" value="salida" type="submit">Registrar salida</button>
+                {% endif %}{% endif %}
+            </form>
+            {% endif %}
+        </section>
+        <section class="page-card">
+            <div class="section-heading"><div><p class="eyebrow">Registro diario</p><h2>Asistencia de hoy</h2></div></div>
+            <form method="get" class="filters attendance-filter"><input name="buscar" value="{{ table_search }}" placeholder="Buscar por cédula o nombre"><button type="submit">Buscar</button></form>
+            <div class="table-wrapper"><table class="workers-table attendance-table">
+                <thead><tr><th>Cédula</th><th>Trabajador</th><th>Grupo</th><th>Hora de entrada</th><th>Hora de salida</th><th>Estado</th><th>Observación</th></tr></thead>
+                <tbody>{% for item in todays_attendance %}<tr><td>{{ item.cedula }}</td><td><strong>{{ item.nombres }} {{ item.apellidos }}</strong></td><td>Grupo {{ item.grupo }}</td><td>{{ item.hora_entrada or '—' }}</td><td>{{ item.hora_salida or '—' }}</td><td><span class="table-status {{ 'working' if item.estado == 'Presente' else 'resting' }}">{{ item.estado }}</span></td><td>{{ item.observacion or '—' }}</td></tr>{% else %}<tr><td colspan="7" class="empty-state">No hay asistencias registradas hoy.</td></tr>{% endfor %}</tbody>
+            </table></div>
+        </section>
+    </main>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

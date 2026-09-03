@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aqua Control | Historial</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-page">
+    <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    <div class="sidebar-overlay"></div>
+    <aside class="sidebar">
+        <div class="sidebar-brand"><img class="sidebar-logo" src="{{ url_for('static', filename='img/logo-aqua-control.png') }}" alt="Aqua Control"></div>
+        <nav class="sidebar-nav" aria-label="Navegación principal">
+            <a class="nav-item" href="{{ url_for('dashboard') }}"><span>⌂</span>Panel principal</a>
+            <a class="nav-item" href="{{ url_for('trabajadores') }}"><span>♙</span>Trabajadores</a>
+            <a class="nav-item" href="{{ url_for('asistencia') }}"><span>✓</span>Asistencia</a>
+            <a class="nav-item" href="{{ url_for('calendario') }}"><span>□</span>Calendario</a>
+            <a class="nav-item active" href="{{ url_for('historial') }}"><span>↺</span>Historial</a>
+            <a class="nav-item" href="{{ url_for('reportes') }}"><span>▥</span>Reportes</a><a class="nav-item" href="{{ url_for('ciclos') }}"><span>◌</span>Ciclos</a>
+            {% if session.get('rol') == 'Administrador' %}<a class="nav-item" href="{{ url_for('usuarios') }}"><span>♙</span>Usuarios</a>{% endif %}
+        </nav>
+        <a class="nav-item logout" href="{{ url_for('logout') }}"><span>↪</span>Cerrar sesión</a>
+    </aside>
+    <main class="dashboard-content">
+        <header class="page-header"><div><p class="eyebrow">Consulta individual</p><h1>Historial de asistencia</h1><p class="welcome">Busca un trabajador y revisa todos sus registros.</p></div></header>
+        <section class="page-card history-search-card">
+            <form method="get" class="history-filters">
+                <label>Trabajador<input name="buscar" value="{{ search }}" placeholder="Cédula, nombres o apellidos" required></label>
+                <label>Fecha desde<input type="date" name="fecha_desde" value="{{ date_from }}"></label>
+                <label>Fecha hasta<input type="date" name="fecha_hasta" value="{{ date_to }}"></label>
+                <label>Mes<select name="mes"><option value="">Todos</option>{% for number in range(1, 13) %}<option value="{{ number }}" {% if month|int == number %}selected{% endif %}>{{ ["","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"][number] }}</option>{% endfor %}</select></label>
+                <label>Año<input type="number" name="ano" min="2000" max="2100" value="{{ year }}" placeholder="Año"></label>
+                <label>Estado<select name="estado"><option value="">Todos</option>{% for option in ['Presente','Ausente','Permiso','Vacaciones','Descanso programado'] %}<option value="{{ option }}" {% if state == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></label>
+                <div class="history-buttons"><button class="secondary-button" type="submit">Buscar</button><a class="cancel-button" href="{{ url_for('historial') }}">Limpiar filtros</a></div>
+            </form>
+        </section>
+        {% if worker %}
+        <section class="page-card worker-history-summary"><div><p class="eyebrow">Trabajador encontrado</p><h2>{{ worker.nombres }} {{ worker.apellidos }}</h2><p>{{ worker.cedula }} · {{ worker.cargo }} · Grupo {{ worker.grupo }} · {{ worker.estado }} · Ingreso: {{ worker.fecha_ingreso }}</p></div></section>
+        <section class="history-stats">{% for key, label in [('Presente','Total de días presentes'),('Ausente','Total de ausencias'),('Permiso','Total de permisos'),('Vacaciones','Total de vacaciones'),('Descanso programado','Total de descansos programados')] %}<article class="history-stat"><span>{{ label }}</span><strong>{{ summary[key] }}</strong></article>{% endfor %}</section>
+        {% if month or year %}<section class="page-card monthly-detail"><h2>Detalle mensual</h2><p>Trabajador: <strong>{{ worker.nombres }} {{ worker.apellidos }}</strong></p><p>Período: <strong>{{ month or 'Todos los meses' }} {{ year or '' }}</strong> · Presentes: {{ summary['Presente'] }} · Ausentes: {{ summary['Ausente'] }} · Permisos: {{ summary['Permiso'] }} · Vacaciones: {{ summary['Vacaciones'] }} · Descanso programado: {{ summary['Descanso programado'] }}</p></section>{% endif %}
+        <section class="page-card"><div class="section-heading"><div><p class="eyebrow">Registros reales y ciclos</p><h2>Historial completo</h2></div></div><div class="table-wrapper"><table class="workers-table history-table"><thead><tr><th>Fecha</th><th>Día de la semana</th><th>Entrada</th><th>Salida</th><th>Estado</th><th>Grupo</th><th>Observación</th></tr></thead><tbody>{% for item in records %}<tr><td>{{ item.fecha }}</td><td>{{ weekday_name(item.fecha) }}</td><td>{{ item.hora_entrada or '—' }}</td><td>{{ item.hora_salida or '—' }}</td><td><span class="table-status state-{{ item.estado|lower|replace(' ','-') }}">{{ item.estado }}</span></td><td>Grupo {{ item.grupo }}</td><td>{{ item.observacion or '—' }}</td></tr>{% else %}<tr><td colspan="7" class="empty-state">No hay registros para los filtros seleccionados.</td></tr>{% endfor %}</tbody></table></div></section>
+        {% elif search %}<div class="alert error">No se encontró un trabajador con esa búsqueda.</div>{% endif %}
+    </main>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

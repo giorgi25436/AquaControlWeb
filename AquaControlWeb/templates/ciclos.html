@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aqua Control | Ciclos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-page">
+    <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    <div class="sidebar-overlay"></div>
+    <aside class="sidebar">
+        <div class="sidebar-brand"><img class="sidebar-logo" src="{{ url_for('static', filename='img/logo-aqua-control.png') }}" alt="Aqua Control"></div>
+        <nav class="sidebar-nav" aria-label="Navegación principal">
+            <a class="nav-item" href="{{ url_for('dashboard') }}"><span>⌂</span>Panel principal</a>
+            <a class="nav-item" href="{{ url_for('trabajadores') }}"><span>♙</span>Trabajadores</a>
+            <a class="nav-item" href="{{ url_for('asistencia') }}"><span>✓</span>Asistencia</a>
+            <a class="nav-item" href="{{ url_for('calendario') }}"><span>□</span>Calendario</a><a class="nav-item" href="{{ url_for('historial') }}"><span>↺</span>Historial</a>
+            <a class="nav-item" href="{{ url_for('reportes') }}"><span>▥</span>Reportes</a><a class="nav-item active" href="{{ url_for('ciclos') }}"><span>◌</span>Ciclos</a>
+            {% if session.get('rol') == 'Administrador' %}<a class="nav-item" href="{{ url_for('usuarios') }}"><span>♙</span>Usuarios</a>{% endif %}
+        </nav>
+        <a class="nav-item logout" href="{{ url_for('logout') }}"><span>↪</span>Cerrar sesión</a>
+    </aside>
+    <main class="dashboard-content">
+        <header class="page-header"><div><p class="eyebrow">Programación automática</p><h1>Ciclos 22x8</h1><p class="welcome">Configura el inicio de cada grupo y consulta su estado en tiempo real.</p></div></header>
+        {% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="alert {{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
+        {% if alerts %}<section class="alerts-panel">{% for alert in alerts %}<div class="cycle-alert">⚠ {{ alert }}</div>{% endfor %}</section>{% endif %}
+        <form method="post">
+            <section class="groups-grid cycle-cards">{% for item in cycles %}
+                <article class="group-card cycle-detail-card">
+                    <div class="group-top"><h3>Grupo {{ item.name }}</h3><span class="status {{ 'resting' if item.is_resting else 'working' }}">{{ item.status }}</span></div>
+                    <label class="cycle-date-label">Fecha de inicio<input type="date" name="fecha_{{ item.name }}" value="{{ item.start_date.isoformat() }}" required></label>
+                    <div class="cycle-big">{{ item.day_label }}</div>
+                    <div class="progress-track {{ 'resting-track' if item.is_resting else '' }}"><span style="width: {{ item.progress }}%"></span></div>
+                    <p class="cycle-remaining">{% if item.is_resting %}Faltan {{ item.days_to_transition }} días para regresar{% else %}Faltan {{ item.days_to_transition }} días para salir de descanso{% endif %}</p>
+                    <div class="cycle-dates"><span>Próxima salida<strong>{{ item.next_exit.strftime('%d/%m/%Y') }}</strong></span><span>Próximo regreso<strong>{{ item.next_return.strftime('%d/%m/%Y') }}</strong></span></div>
+                </article>
+            {% endfor %}</section>
+            <button class="secondary-button save-cycles" type="submit">Guardar fechas de inicio</button>
+        </form>
+    </main>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

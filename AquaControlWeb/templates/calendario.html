@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aqua Control | Calendario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-page">
+    <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    <div class="sidebar-overlay"></div>
+    <aside class="sidebar">
+        <div class="sidebar-brand"><img class="sidebar-logo" src="{{ url_for('static', filename='img/logo-aqua-control.png') }}" alt="Aqua Control"></div>
+        <nav class="sidebar-nav" aria-label="Navegación principal">
+            <a class="nav-item" href="{{ url_for('dashboard') }}"><span>⌂</span>Panel principal</a>
+            <a class="nav-item" href="{{ url_for('trabajadores') }}"><span>♙</span>Trabajadores</a>
+            <a class="nav-item" href="{{ url_for('asistencia') }}"><span>✓</span>Asistencia</a>
+            <a class="nav-item active" href="{{ url_for('calendario') }}"><span>□</span>Calendario</a>
+            <a class="nav-item" href="{{ url_for('historial') }}"><span>↺</span>Historial</a><a class="nav-item" href="{{ url_for('reportes') }}"><span>▥</span>Reportes</a>
+            <a class="nav-item" href="{{ url_for('ciclos') }}"><span>◌</span>Ciclos</a>
+            {% if session.get('rol') == 'Administrador' %}<a class="nav-item" href="{{ url_for('usuarios') }}"><span>♙</span>Usuarios</a>{% endif %}
+        </nav>
+        <a class="nav-item logout" href="{{ url_for('logout') }}"><span>↪</span>Cerrar sesión</a>
+    </aside>
+    <main class="dashboard-content">
+        <header class="page-header">
+            <div><p class="eyebrow">Planificación operativa</p><h1>Calendario</h1><p class="welcome">Consulta las jornadas y descansos calculados para cada grupo.</p></div>
+            <span class="date-badge">{{ today.strftime('%d/%m/%Y') }}</span>
+        </header>
+        <section class="page-card calendar-card">
+            <div class="calendar-toolbar">
+                <a class="calendar-nav" href="{{ url_for('calendario', year=previous_month.year, month=previous_month.month) }}">‹</a>
+                <h2>{{ month_name }}</h2>
+                <a class="calendar-nav" href="{{ url_for('calendario', year=next_month.year, month=next_month.month) }}">›</a>
+                <form method="get" class="month-picker"><input type="month" name="periodo" value="{{ '%04d-%02d'|format(year, month) }}" onchange="this.form.submit()"><input type="hidden" name="year" value="{{ year }}"><input type="hidden" name="month" value="{{ month }}"></form>
+            </div>
+            <div class="calendar-weekdays">{% for day in ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'] %}<span>{{ day }}</span>{% endfor %}</div>
+            <div class="calendar-grid">
+                {% for day in calendar_days %}
+                <a class="calendar-day {{ '' if day.is_current_month else 'outside' }} {{ 'today' if day.date == today else '' }} {{ 'selected' if day.date == selected_date else '' }}" href="{{ url_for('calendario', year=year, month=month, fecha=day.date.isoformat()) }}">
+                    <strong>{{ day.date.day }}</strong>
+                    <div class="day-groups">{% for item in day.cycles %}<span class="day-group {{ 'rest-day' if item.is_resting else 'work-day' }} {{ item.event }}">{{ item.name }}{% if item.event %} · {{ item.event|capitalize }}{% endif %}</span>{% endfor %}</div>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="calendar-legend"><span><i class="legend-dot work"></i>Laborando</span><span><i class="legend-dot rest"></i>Descanso programado</span><span><i class="legend-dot exit"></i>Día de salida</span><span><i class="legend-dot return"></i>Día de regreso</span></div>
+        </section>
+        <section class="calendar-lower">
+            <div class="page-card selected-day-card"><div class="section-heading"><div><p class="eyebrow">Detalle diario</p><h2>{{ selected_date.strftime('%d/%m/%Y') }}</h2></div></div>
+                {% for item in selected_cycles %}<div class="selected-group"><div><strong>Grupo {{ item.name }}</strong><span class="status {{ 'resting' if item.is_resting else 'working' }}">{{ item.status }}</span></div><span>{{ item.day_label }}</span>{% if item.event == 'salida' %}<small class="movement-note exit-note">Grupo {{ item.name }} inicia descanso hoy.</small>{% elif item.event == 'regreso' %}<small class="movement-note return-note">Grupo {{ item.name }} regresa a trabajar hoy.</small>{% endif %}</div>{% endfor %}
+            </div>
+            <div class="page-card movements-card"><div class="section-heading"><div><p class="eyebrow">Agenda próxima</p><h2>Próximos movimientos</h2></div></div>
+                {% for movement in movements %}<div class="movement-row"><span class="movement-date">{{ movement.date.strftime('%d/%m') }}</span><div><strong>Grupo {{ movement.group }}</strong><small class="{{ 'exit-note' if movement.is_exit else 'return-note' }}">{{ movement.type }}</small></div></div>{% endfor %}
+            </div>
+        </section>
+    </main>
+    <script>
+        document.querySelector(".month-picker").addEventListener("change", function () {
+            const value = this.querySelector("input[name='periodo']").value.split("-");
+            window.location = "{{ url_for('calendario') }}" + "?year=" + value[0] + "&month=" + Number(value[1]);
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

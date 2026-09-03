@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aqua Control | Panel de Control</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-page">
+    <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    <div class="sidebar-overlay"></div>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <img class="sidebar-logo" src="{{ url_for('static', filename='img/logo-aqua-control.png') }}" alt="Aqua Control">
+            <div><strong>AQUA</strong><span>CONTROL</span></div>
+        </div>
+        <nav class="sidebar-nav" aria-label="Navegación principal">
+            <a class="nav-item active" href="{{ url_for('dashboard') }}"><span>⌂</span>Panel principal</a>
+            <a class="nav-item" href="{{ url_for('trabajadores') }}"><span>♙</span>Trabajadores</a>
+            <a class="nav-item" href="{{ url_for('asistencia') }}"><span>✓</span>Asistencia</a>
+            <a class="nav-item" href="{{ url_for('calendario') }}"><span>□</span>Calendario</a>
+            <a class="nav-item" href="{{ url_for('historial') }}"><span>↺</span>Historial</a>
+            <a class="nav-item" href="{{ url_for('reportes') }}"><span>▥</span>Reportes</a>
+            <a class="nav-item" href="{{ url_for('ciclos') }}"><span>◌</span>Ciclos</a>
+            {% if user_role == 'Administrador' %}<a class="nav-item" href="{{ url_for('usuarios') }}"><span>♙</span>Usuarios</a>{% endif %}
+        </nav>
+        <a class="nav-item logout" href="{{ url_for('logout') }}"><span>↪</span>Cerrar sesión</a>
+    </aside>
+
+    <main class="dashboard-content">
+        <header class="dashboard-header">
+            <div>
+                <p class="eyebrow">Resumen general</p>
+                <h1>Panel de Control</h1>
+                <p class="welcome">Bienvenido <strong>{{ user_name }}</strong> · {{ user_role }}</p>
+            </div>
+            <div class="user-tools"><span class="user-role">{{ user_role }}</span><div class="user-avatar" aria-label="Usuario conectado">{{ user_name[0]|upper }}</div><a class="logout-top" href="{{ url_for('logout') }}">Cerrar sesión</a></div>
+        </header>
+
+        <section class="stats-grid" aria-label="Indicadores principales">
+            <article class="stat-card">
+                <div class="stat-icon blue">♙</div>
+                <div><p>Trabajadores</p><strong>{{ active_worker_count }}</strong></div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-icon green">✓</div>
+                <div><p>Presentes hoy</p><strong>{{ present_count }}</strong></div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-icon orange">!</div>
+                <div><p>Ausentes hoy</p><strong>{{ absent_count }}</strong></div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-icon purple">◌</div>
+                <div><p>Grupos en descanso</p><strong>{{ resting_group_count }}</strong></div>
+            </article>
+        </section>
+
+        {% if alerts %}<section class="alerts-panel">{% for alert in alerts %}<div class="cycle-alert">⚠ {{ alert }}</div>{% endfor %}</section>{% endif %}
+        <section class="groups-section">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Seguimiento de ciclos</p>
+                    <h2>Estado de los grupos</h2>
+                </div>
+                <span class="date-badge">Hoy</span>
+            </div>
+            <div class="groups-grid">{% for item in cycles %}
+                <article class="group-card">
+                    <div class="group-top"><h3>Grupo {{ item.name }}</h3><span class="status {{ 'resting' if item.is_resting else 'working' }}">{{ item.status }}</span></div>
+                    <p class="cycle-label">{{ item.day_label }}</p><div class="progress-track {{ 'resting-track' if item.is_resting else '' }}"><span style="width: {{ item.progress }}%"></span></div>
+                    <div class="group-bottom"><strong>{{ item.days_to_transition }} día{{ '' if item.days_to_transition == 1 else 's' }} restante{{ '' if item.days_to_transition == 1 else 's' }}</strong><span>Salida: {{ item.next_exit.strftime('%d/%m/%Y') }}</span></div>
+                </article>
+            {% endfor %}</div>
+        </section>
+        <section class="cycle-summary"><div><span>Próxima salida</span><strong>Grupo {{ next_exit.name }} · {{ next_exit.next_exit.strftime('%d/%m/%Y') }}</strong></div><div><span>Próximo regreso</span><strong>Grupo {{ next_return.name }} · {{ next_return.next_return.strftime('%d/%m/%Y') }}</strong></div></section>
+    </main>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
