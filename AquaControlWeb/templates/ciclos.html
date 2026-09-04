@@ -29,11 +29,15 @@
             <section class="groups-grid cycle-cards">{% for item in cycles %}
                 <article class="group-card cycle-detail-card">
                     <div class="group-top"><h3>Grupo {{ item.name }}</h3><span class="status {{ 'resting' if item.is_resting else 'working' }}">{{ item.status }}</span></div>
+                    <label class="cycle-date-label">Modo de estado<select name="modo_{{ item.name }}" required><option value="Automatico" {% if item.mode == 'Automatico' %}selected{% endif %}>Automático</option><option value="Forzar LABORANDO" {% if item.mode == 'Forzar LABORANDO' %}selected{% endif %}>Forzar LABORANDO</option><option value="Forzar EN DESCANSO" {% if item.mode == 'Forzar EN DESCANSO' %}selected{% endif %}>Forzar EN DESCANSO</option></select></label>
+                    {% if item.mode != 'Automatico' %}<p class="manual-state">Estado manual</p>{% endif %}
                     <label class="cycle-date-label">Fecha de inicio<input type="date" name="fecha_{{ item.name }}" value="{{ item.start_date.isoformat() }}" required></label>
+                    {% if item.mode != 'Automatico' %}<label class="cycle-date-label">Fecha desde la cual aplica<input type="date" name="manual_inicio_{{ item.name }}" value="{{ item.manual_start.isoformat() if item.manual_start else '' }}" required></label>{% endif %}
+                    {% if item.mode == 'Forzar EN DESCANSO' %}<label class="cycle-date-label">Fecha estimada de regreso<input type="date" name="manual_regreso_{{ item.name }}" value="{{ item.manual_return.isoformat() if item.manual_return else '' }}"></label>{% endif %}
                     <div class="cycle-big">{{ item.day_label }}</div>
                     <div class="progress-track {{ 'resting-track' if item.is_resting else '' }}"><span style="width: {{ item.progress }}%"></span></div>
-                    <p class="cycle-remaining">{% if item.is_resting %}Faltan {{ item.days_to_transition }} días para regresar{% else %}Faltan {{ item.days_to_transition }} días para salir de descanso{% endif %}</p>
-                    <div class="cycle-dates"><span>Próxima salida<strong>{{ item.next_exit.strftime('%d/%m/%Y') }}</strong></span><span>Próximo regreso<strong>{{ item.next_return.strftime('%d/%m/%Y') }}</strong></span></div>
+                    <p class="cycle-remaining">{% if item.mode == 'Forzar LABORANDO' %}Estado manual activo{% elif item.is_resting %}Faltan {{ item.days_to_transition }} días para regresar{% else %}Faltan {{ item.days_to_transition }} días para salir de descanso{% endif %}</p>
+                    {% if item.mode == 'Forzar LABORANDO' %}<div class="cycle-dates"><span>Laborando desde<strong>{{ item.manual_start.strftime('%d/%m/%Y') if item.manual_start else 'Hoy' }}</strong></span></div>{% else %}<div class="cycle-dates"><span>Próxima salida<strong>{{ item.next_exit.strftime('%d/%m/%Y') }}</strong></span><span>Próximo regreso<strong>{{ item.next_return.strftime('%d/%m/%Y') }}</strong></span></div>{% endif %}
                 </article>
             {% endfor %}</section>
             <button class="secondary-button save-cycles" type="submit">Guardar fechas de inicio</button>

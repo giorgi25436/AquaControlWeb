@@ -70,11 +70,11 @@
                 <article class="group-card">
                     <div class="group-top"><h3>Grupo {{ item.name }}</h3><span class="status {{ 'resting' if item.is_resting else 'working' }}">{{ item.status }}</span></div>
                     <p class="cycle-label">{{ item.day_label }}</p><div class="progress-track {{ 'resting-track' if item.is_resting else '' }}"><span style="width: {{ item.progress }}%"></span></div>
-                    <div class="group-bottom"><strong>{{ item.days_to_transition }} día{{ '' if item.days_to_transition == 1 else 's' }} restante{{ '' if item.days_to_transition == 1 else 's' }}</strong><span>Salida: {{ item.next_exit.strftime('%d/%m/%Y') }}</span></div>
+                    <div class="group-bottom">{% if item.mode == 'Forzar LABORANDO' %}<strong>Estado manual activo</strong><span>Laborando desde {{ item.manual_start.strftime('%d/%m/%Y') if item.manual_start else 'hoy' }}</span>{% else %}<strong>{{ item.days_to_transition }} día{{ '' if item.days_to_transition == 1 else 's' }} restante{{ '' if item.days_to_transition == 1 else 's' }}</strong><span>Salida: {{ item.next_exit.strftime('%d/%m/%Y') }}</span>{% endif %}</div>
                 </article>
             {% endfor %}</div>
         </section>
-        <section class="cycle-summary"><div><span>Próxima salida</span><strong>Grupo {{ next_exit.name }} · {{ next_exit.next_exit.strftime('%d/%m/%Y') }}</strong></div><div><span>Próximo regreso</span><strong>Grupo {{ next_return.name }} · {{ next_return.next_return.strftime('%d/%m/%Y') }}</strong></div></section>
+        <section class="cycle-summary"><div><span>Próxima salida</span><strong>{% if next_exit %}Grupo {{ next_exit.name }} · {{ next_exit.next_exit.strftime('%d/%m/%Y') }}{% else %}Sin salida programada{% endif %}</strong></div><div><span>Próximo regreso</span><strong>{% if next_return %}Grupo {{ next_return.name }} · {{ next_return.next_return.strftime('%d/%m/%Y') }}{% else %}Sin regreso programado{% endif %}</strong></div></section>
     </main>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>

@@ -64,10 +64,24 @@ def init_db():
                 grupo TEXT PRIMARY KEY CHECK (grupo IN ('A', 'B', 'C')),
                 fecha_inicio TEXT NOT NULL,
                 dias_trabajo INTEGER NOT NULL DEFAULT 22,
-                dias_descanso INTEGER NOT NULL DEFAULT 8
+                dias_descanso INTEGER NOT NULL DEFAULT 8,
+                modo_estado TEXT NOT NULL DEFAULT 'Automatico',
+                fecha_inicio_manual TEXT,
+                fecha_regreso_manual TEXT
             )
             """
         )
+        cycle_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(ciclos)").fetchall()
+        }
+        for column, definition in (
+            ("modo_estado", "TEXT NOT NULL DEFAULT 'Automatico'"),
+            ("fecha_inicio_manual", "TEXT"),
+            ("fecha_regreso_manual", "TEXT"),
+        ):
+            if column not in cycle_columns:
+                connection.execute(f"ALTER TABLE ciclos ADD COLUMN {column} {definition}")
         existing = connection.execute("SELECT COUNT(*) FROM ciclos").fetchone()[0]
         if existing == 0:
             today = date.today()

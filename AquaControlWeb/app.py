@@ -112,6 +112,8 @@ def dashboard():
     resting_groups = tuple(item["name"] for item in cycles if item["is_resting"])
     today_counts = attendance_counts(today.isoformat(), resting_groups)
     alerts = cycle_alerts(cycles)
+    exit_candidates = [item for item in cycles if item["next_exit"] != date.max]
+    return_candidates = [item for item in cycles if item["next_return"] != date.max]
     return render_template(
         "dashboard.html",
         username=session["username"],
@@ -122,8 +124,8 @@ def dashboard():
         absent_count=today_counts.get("Ausente", 0),
         cycles=cycles,
         alerts=alerts,
-        next_exit=min(cycles, key=lambda item: item["next_exit"]),
-        next_return=min(cycles, key=lambda item: item["next_return"]),
+        next_exit=min(exit_candidates, key=lambda item: item["next_exit"]) if exit_candidates else None,
+        next_return=min(return_candidates, key=lambda item: item["next_return"]) if return_candidates else None,
         resting_group_count=sum(item["is_resting"] for item in cycles),
     )
 
@@ -345,10 +347,17 @@ def get_cycle_data(today=None):
     today = today or date.today()
     with get_connection() as connection:
         rows = connection.execute(
-            "SELECT grupo, fecha_inicio FROM ciclos ORDER BY grupo"
+            "SELECT grupo, fecha_inicio, modo_estado, fecha_inicio_manual, fecha_regreso_manual FROM ciclos ORDER BY grupo"
         ).fetchall()
     return [
-        calculate_cycle(row["grupo"], date.fromisoformat(row["fecha_inicio"]), today)
+        calculate_cycle(
+            row["grupo"],
+            date.fromisoformat(row["fecha_inicio"]),
+            today,
+            row["modo_estado"],
+            date.fromisoformat(row["fecha_inicio_manual"]) if row["fecha_inicio_manual"] else None,
+            date.fromisoformat(row["fecha_regreso_manual"]) if row["fecha_regreso_manual"] else None,
+        )
         for row in rows
     ]
 
@@ -372,15 +381,30 @@ def ciclos():
     if request.method == "POST":
         for group in ("A", "B", "C"):
             start = request.form.get(f"fecha_{group}", "").strip()
+            mode = request.form.get(f"modo_{group}", "Automatico").strip()
+            manual_start = request.form.get(f"manual_inicio_{group}", "").strip() or None
+            manual_return = request.form.get(f"manual_regreso_{group}", "").strip() or None
             try:
                 date.fromisoformat(start)
+                if mode not in {"Automatico", "Forzar LABORANDO", "Forzar EN DESCANSO"}:
+                    raise ValueError
+                if mode != "Automatico" and not manual_start:
+                    raise ValueError
+                manual_start_date = date.fromisoformat(manual_start) if manual_start else None
+                manual_return_date = date.fromisoformat(manual_return) if manual_return else None
+                if mode == "Forzar EN DESCANSO" and manual_return_date and manual_return_date <= manual_start_date:
+                    raise ValueError
             except ValueError:
                 flash(f"La fecha del Grupo {group} no es válida.", "error")
                 return redirect(url_for("ciclos"))
             with get_connection() as connection:
                 connection.execute(
-                    "UPDATE ciclos SET fecha_inicio = ?, dias_trabajo = 22, dias_descanso = 8 WHERE grupo = ?",
-                    (start, group),
+                    """
+                    UPDATE ciclos SET fecha_inicio = ?, dias_trabajo = 22, dias_descanso = 8,
+                    modo_estado = ?, fecha_inicio_manual = ?, fecha_regreso_manual = ?
+                    WHERE grupo = ?
+                    """,
+                    (start, mode, manual_start, manual_return, group),
                 )
         flash("Fechas de ciclo actualizadas correctamente.", "success")
         audit(current_user_id(), "Cambio de ciclos")
