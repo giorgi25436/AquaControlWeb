@@ -1,0 +1,47 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="blinker" />
+          <option value="click" />
+          <option value="colorama" />
+          <option value="Faker" />
+          <option value="Flask" />
+          <option value="importlib_metadata" />
+          <option value="itsdangerous" />
+          <option value="Jinja2" />
+          <option value="joblib" />
+          <option value="MarkupSafe" />
+          <option value="numpy" />
+          <option value="pandas" />
+          <option value="python-dateutil" />
+          <option value="pytz" />
+          <option value="scikit-learn" />
+          <option value="scipy" />
+          <option value="six" />
+          <option value="threadpoolctl" />
+          <option value="tzdata" />
+          <option value="Werkzeug" />
+          <option value="zipp" />
+          <option value="cffi" />
+          <option value="gevent" />
+          <option value="greenlet" />
+          <option value="gunicorn" />
+          <option value="idna" />
+          <option value="importlib-resources" />
+          <option value="pillow" />
+          <option value="pycparser" />
+          <option value="pyparsing" />
+          <option value="reportlab" />
+          <option value="requests" />
+          <option value="typing-extensions" />
+          <option value="urllib3" />
+          <option value="zope.event" />
+          <option value="zope.interface" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
