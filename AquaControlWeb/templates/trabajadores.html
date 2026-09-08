@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aqua Control | Trabajadores</title>
+    <title>AGCOMPANY | Trabajadores</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 </head>
 <body class="dashboard-page">
     <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
     <div class="sidebar-overlay"></div>
     <aside class="sidebar">
-        <div class="sidebar-brand"><img class="sidebar-logo" src="{{ url_for('static', filename='img/logo-aqua-control.png') }}" alt="Aqua Control"></div>
+        <div class="sidebar-brand"><img class="sidebar-logo" src="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}" alt="AGCOMPANY"></div>
         <nav class="sidebar-nav" aria-label="Navegación principal">
             <a class="nav-item" href="{{ url_for('dashboard') }}"><span>⌂</span>Panel principal</a>
             <a class="nav-item active" href="{{ url_for('trabajadores') }}"><span>♙</span>Trabajadores</a>
@@ -22,7 +25,7 @@
     </aside>
     <main class="dashboard-content">
         <header class="page-header">
-            <div><p class="eyebrow">Gestión de personal</p><h1>Trabajadores</h1><p class="welcome">Administra el registro de trabajadores de Aqua Control.</p></div>
+            <div><p class="eyebrow">Gestión de personal</p><h1>Trabajadores</h1><p class="welcome">Administra el registro de trabajadores de AGCOMPANY.</p></div>
             {% if not worker %}<a class="secondary-button" href="{{ url_for('trabajadores', nuevo=1) }}#worker-form">+ Nuevo trabajador</a>{% endif %}
         </header>
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -64,6 +67,7 @@
             </div>
         </section>
     </main>
+    {% include "base.html" %}
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aqua Control | Panel de Control</title>
+    <title>AGCOMPANY | Panel de Control</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 </head>
 <body class="dashboard-page">
     <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
@@ -12,8 +15,7 @@
 
     <aside class="sidebar">
         <div class="sidebar-brand">
-            <img class="sidebar-logo" src="{{ url_for('static', filename='img/logo-aqua-control.png') }}" alt="Aqua Control">
-            <div><strong>AQUA</strong><span>CONTROL</span></div>
+            <img class="sidebar-logo" src="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}" alt="AGCOMPANY">
         </div>
         <nav class="sidebar-nav" aria-label="Navegación principal">
             <a class="nav-item active" href="{{ url_for('dashboard') }}"><span>⌂</span>Panel principal</a>
@@ -76,6 +78,7 @@
         </section>
         <section class="cycle-summary"><div><span>Próxima salida</span><strong>{% if next_exit %}Grupo {{ next_exit.name }} · {{ next_exit.next_exit.strftime('%d/%m/%Y') }}{% else %}Sin salida programada{% endif %}</strong></div><div><span>Próximo regreso</span><strong>{% if next_return %}Grupo {{ next_return.name }} · {{ next_return.next_return.strftime('%d/%m/%Y') }}{% else %}Sin regreso programado{% endif %}</strong></div></section>
     </main>
+    {% include "base.html" %}
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

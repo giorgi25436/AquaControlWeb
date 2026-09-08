@@ -1,16 +1,21 @@
+import os
 import sqlite3
 from datetime import datetime
 from datetime import date, timedelta
 from pathlib import Path
 
-DATABASE_DIR = Path(__file__).with_name("database")
+DATABASE_PATH = Path(os.environ.get("DATABASE_PATH", Path(__file__).with_name("database") / "aqua_control.db"))
+DATABASE_DIR = DATABASE_PATH.parent
 DATABASE_DIR.mkdir(parents=True, exist_ok=True)
-DATABASE_PATH = DATABASE_DIR / "aqua_control.db"
 
 
 def get_connection():
-    connection = sqlite3.connect(DATABASE_PATH)
+    connection = sqlite3.connect(DATABASE_PATH, timeout=10)
     connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA busy_timeout = 10000")
+    connection.execute("PRAGMA journal_mode = WAL")
+    connection.execute("PRAGMA synchronous = FULL")
+    connection.execute("PRAGMA foreign_keys = ON")
     return connection
 
 

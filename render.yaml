@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: aqua-control
+    runtime: python
+    rootDir: AquaControlWeb
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    healthCheckPath: /
+    disk:
+      name: aqua-control-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: INITIAL_ADMIN_PASSWORD
+        sync: false
+      - key: DATABASE_PATH
+        value: /var/data/aqua_control.db

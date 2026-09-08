@@ -683,7 +683,7 @@ def export_report(format_name):
         book = Workbook()
         sheet = book.active
         sheet.title = "Reporte"
-        sheet.append(["AQUA CONTROL"])
+        sheet.append(["AGCOMPANY"])
         sheet.append(["Gestión de Personal Camaronero"])
         sheet.append([title, f"Período: {start.strftime('%d/%m/%Y')} - {end.strftime('%d/%m/%Y')}"])
         sheet.append([])
@@ -706,7 +706,7 @@ def export_report(format_name):
     output = BytesIO()
     document = SimpleDocTemplate(output, pagesize=landscape(letter), rightMargin=25, leftMargin=25, topMargin=25, bottomMargin=25)
     styles = getSampleStyleSheet()
-    story = [Paragraph("AQUA CONTROL", styles["Title"]), Paragraph("Gestión de Personal Camaronero", styles["Normal"]), Paragraph(f"{title} · {start.strftime('%d/%m/%Y')} - {end.strftime('%d/%m/%Y')}", styles["Normal"]), Spacer(1, 14)]
+    story = [Paragraph("AGCOMPANY", styles["Title"]), Paragraph("Gestión de Personal Camaronero", styles["Normal"]), Paragraph(f"{title} · {start.strftime('%d/%m/%Y')} - {end.strftime('%d/%m/%Y')}", styles["Normal"]), Spacer(1, 14)]
     data = [["Fecha", "Cédula", "Trabajador", "Cargo", "Grupo", "Entrada", "Salida", "Estado", "Observación"]]
     data.extend([[row["fecha"], row["cedula"], f"{row['nombres']} {row['apellidos']}", row["cargo"], row["grupo"], row["hora_entrada"] or "-", row["hora_salida"] or "-", row["estado"], row["observacion"] or "-"] for row in rows])
     table = Table(data, repeatRows=1)

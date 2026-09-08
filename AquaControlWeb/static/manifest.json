@@ -1,0 +1,20 @@
+{
+  "name": "AGCOMPANY",
+  "short_name": "AGCOMPANY",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f5fae",
+  "icons": [
+    {
+      "src": "img/9e0157d6-9a6c-4229-b169-logo_nuevo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "img/9e0157d6-9a6c-4229-b169-logo_nuevo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

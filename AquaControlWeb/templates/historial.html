@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aqua Control | Historial</title>
+    <title>AGCOMPANY | Historial</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 </head>
 <body class="dashboard-page">
     <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
     <div class="sidebar-overlay"></div>
     <aside class="sidebar">
-        <div class="sidebar-brand"><img class="sidebar-logo" src="{{ url_for('static', filename='img/logo-aqua-control.png') }}" alt="Aqua Control"></div>
+        <div class="sidebar-brand"><img class="sidebar-logo" src="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}" alt="AGCOMPANY"></div>
         <nav class="sidebar-nav" aria-label="Navegación principal">
             <a class="nav-item" href="{{ url_for('dashboard') }}"><span>⌂</span>Panel principal</a>
             <a class="nav-item" href="{{ url_for('trabajadores') }}"><span>♙</span>Trabajadores</a>
@@ -42,6 +45,7 @@
         <section class="page-card"><div class="section-heading"><div><p class="eyebrow">Registros reales y ciclos</p><h2>Historial completo</h2></div></div><div class="table-wrapper"><table class="workers-table history-table"><thead><tr><th>Fecha</th><th>Día de la semana</th><th>Entrada</th><th>Salida</th><th>Estado</th><th>Grupo</th><th>Observación</th></tr></thead><tbody>{% for item in records %}<tr><td>{{ item.fecha }}</td><td>{{ weekday_name(item.fecha) }}</td><td>{{ item.hora_entrada or '—' }}</td><td>{{ item.hora_salida or '—' }}</td><td><span class="table-status state-{{ item.estado|lower|replace(' ','-') }}">{{ item.estado }}</span></td><td>Grupo {{ item.grupo }}</td><td>{{ item.observacion or '—' }}</td></tr>{% else %}<tr><td colspan="7" class="empty-state">No hay registros para los filtros seleccionados.</td></tr>{% endfor %}</tbody></table></div></section>
         {% elif search %}<div class="alert error">No se encontró un trabajador con esa búsqueda.</div>{% endif %}
     </main>
+    {% include "base.html" %}
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

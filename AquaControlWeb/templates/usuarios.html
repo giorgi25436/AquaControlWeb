@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aqua Control | Usuarios</title>
+    <title>AGCOMPANY | Usuarios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 </head>
 <body class="dashboard-page">
     <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button><div class="sidebar-overlay"></div>
     <aside class="sidebar">
-        <div class="sidebar-brand"><img class="sidebar-logo" src="{{ url_for('static', filename='img/logo-aqua-control.png') }}" alt="Aqua Control"></div>
+        <div class="sidebar-brand"><img class="sidebar-logo" src="{{ url_for('static', filename='img/9e0157d6-9a6c-4229-b169-logo_nuevo.png') }}" alt="AGCOMPANY"></div>
         <nav class="sidebar-nav" aria-label="Navegación principal">
             <a class="nav-item" href="{{ url_for('dashboard') }}"><span>⌂</span>Panel principal</a><a class="nav-item" href="{{ url_for('trabajadores') }}"><span>♙</span>Trabajadores</a><a class="nav-item" href="{{ url_for('asistencia') }}"><span>✓</span>Asistencia</a><a class="nav-item" href="{{ url_for('calendario') }}"><span>□</span>Calendario</a><a class="nav-item" href="{{ url_for('historial') }}"><span>↺</span>Historial</a><a class="nav-item" href="{{ url_for('reportes') }}"><span>▥</span>Reportes</a><a class="nav-item" href="{{ url_for('ciclos') }}"><span>◌</span>Ciclos</a><a class="nav-item active" href="{{ url_for('usuarios') }}"><span>♙</span>Usuarios</a>
         </nav><a class="nav-item logout" href="{{ url_for('logout') }}"><span>↪</span>Cerrar sesión</a>
@@ -28,6 +31,7 @@
             </form>
         </section>
         <section class="page-card user-table-card"><div class="section-heading"><div><p class="eyebrow">Cuentas registradas</p><h2>Usuarios del sistema</h2></div></div><div class="table-wrapper"><table class="workers-table"><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Fecha de creación</th><th>Acciones</th></tr></thead><tbody>{% for item in users %}<tr><td><strong>{{ item.nombre }}</strong></td><td>{{ item.usuario }}</td><td>{{ item.rol }}</td><td><span class="table-status {{ 'working' if item.estado == 'Activo' else 'resting' }}">{{ item.estado }}</span></td><td>{{ item.fecha_creacion[:10] }}</td><td><div class="table-actions"><a class="action-button edit-button" href="{{ url_for('usuarios', editar=item.id) }}">Editar</a>{% if item.id != session.get('user_id') %}<form method="post" action="{{ url_for('cambiar_estado_usuario', user_id=item.id) }}"><button class="action-button delete-button" type="submit">{{ 'Desactivar' if item.estado == 'Activo' else 'Activar' }}</button></form>{% endif %}<form method="post" action="{{ url_for('restablecer_password_usuario', user_id=item.id) }}"><input class="reset-password-input" name="password" type="password" minlength="8" placeholder="Nueva contraseña" required><button class="action-button edit-button" type="submit">Restablecer</button></form></div></td></tr>{% endfor %}</tbody></table></div></section>
-    </main><script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    </main>    {% include "base.html" %}
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
